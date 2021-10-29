@@ -1,8 +1,12 @@
-import { Context, PersistentMap } from "near-sdk-as";
+import { Context, logging, PersistentMap, u128 } from "near-sdk-as";
 
 import { User, users } from "../models/user";
 import { Book, books } from "../models/book";
 import { Fragment } from "../models/fragment";
+
+export function helloWorld(): string {
+  return "Hello!";
+}
 
 export function registerUser(email: string, name: string): string {
   const newUser = new User(Context.sender, email, [], name, []);
@@ -15,7 +19,7 @@ export function postBook(
   title: string,
   price: string,
   synopsis: string,
-  content: [{ title: string; body: string }]
+  content: string
 ): string {
   const author = Context.sender;
   const newBook = new Book(title, author, price, synopsis, content);
@@ -23,7 +27,9 @@ export function postBook(
 
   if (user) {
     books.set(title, newBook);
+
     user.postedBooks.push(newBook);
+    users.set(author, user);
     return `${title} has been registered! by  ${author}`;
   } else {
     return "The user is not registered";
@@ -36,7 +42,7 @@ export function getBook(title: string): Book {
     return book;
   }
 
-  return new Book("", "", "", "", [{ title: "", body: "" }]);
+  return new Book("", "", "", "", "");
 }
 
 export function getBooks(): PersistentMap<String, Book> {
@@ -50,19 +56,29 @@ export function buyBook(title: string): string {
   if (book) {
     const user = users.get(sender);
     if (user) {
-      user.acquisitions.push(book);
-      if (attachedDeposit) {
+      logging.log(attachedDeposit);
+      logging.log(book.price + "000000000000000000000000");
+      if (
+        attachedDeposit >= u128.from(book.price + "000000000000000000000000")
+      ) {
+        user.acquisitions.push(book);
+        users.set(sender, user);
         return "Enjoy your new book: " + title;
       }
-      return (
-        "The price of the book is: " +
-        book.price +
-        ` you inserted ${attachedDeposit}`
-      );
+      return "Not enough amount inserted";
     }
 
     return "User: '" + sender + "' is not registered";
   }
 
   return "No book: '" + title + "' found";
+}
+
+export function getUserData(accountId: string): User {
+  const user = users.getSome(accountId);
+
+  if (user) {
+    return user;
+  }
+  return new User("", "", [], "", []);
 }

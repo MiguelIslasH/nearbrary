@@ -1,4 +1,4 @@
-import { PersistentMap } from "near-sdk-as";
+import { PersistentMap, u128 } from "near-sdk-as";
 
 @nearBindgen
 export class Book {
@@ -6,14 +6,14 @@ export class Book {
   author: string;
   price: string;
   synopsis: string;
-  content: [{ title: string; body: string }];
+  content: string;
 
   constructor(
     title: string,
     author: string,
     price: string,
     synopsis: string,
-    content: [{ title: string; body: string }]
+    content: string
   ) {
     this.author = author;
     this.content = content;
