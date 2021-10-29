@@ -50,22 +50,23 @@ export function getBooks(): PersistentMap<String, Book> {
 }
 
 export function buyBook(title: string): string {
-  const attachedDeposit = Context.attachedDeposit;
+  const attachedDeposit = Context.attachedDeposit.as<u128>();
   const sender = Context.sender;
   const book = books.get(title);
   if (book) {
     const user = users.get(sender);
     if (user) {
       logging.log(attachedDeposit);
-      logging.log(book.price + "000000000000000000000000");
-      if (
-        attachedDeposit >= u128.from(book.price + "000000000000000000000000")
-      ) {
+      logging.log(u128.from(book.price));
+      if (attachedDeposit >= u128.from(book.price)) {
         user.acquisitions.push(book);
         users.set(sender, user);
         return "Enjoy your new book: " + title;
       }
-      return "Not enough amount inserted";
+      return (
+        "The price of the book is higher: " +
+        ` you inserted ${attachedDeposit} NEAR`
+      );
     }
 
     return "User: '" + sender + "' is not registered";
