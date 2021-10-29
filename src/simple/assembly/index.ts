@@ -56,8 +56,6 @@ export function buyBook(title: string): string {
   if (book) {
     const user = users.get(sender);
     if (user) {
-      logging.log(attachedDeposit);
-      logging.log(u128.from(book.price));
       if (attachedDeposit >= u128.from(book.price)) {
         user.acquisitions.push(book);
         users.set(sender, user);
