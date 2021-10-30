@@ -1,168 +1,71 @@
-# `near-sdk-as` Starter Kit
+# 📖 Nearbrary
+Proyecto realizado para el NCD Bootcamp NEAR Hispano, edición de octubre 2021.
 
-This is a good project to use as a starting point for your AssemblyScript project.
+# Nearbrary es un plataforma donde puedes subir escritos y ganar dinero con ellos, sin editoriales de por medio.
 
-## Samples
+# 📕 En Nearbrary, los usuarios podrán:
+  - Subir libros completos de su autoría con el fin de obtener ingresos o ponerlos públicos
+  - Comprar obras, ya sea un capítulo o de forma completa
+  - Revisar el catálogo de obras disponibles o próximas a publicar
 
-This repository includes a complete project structure for AssemblyScript contracts targeting the NEAR platform.
+Cada miembro dentro de la comunidad se identifica con su NEAR account ID 
 
-The example here is very basic.  It's a simple contract demonstrating the following concepts:
-- a single contract
-- the difference between `view` vs. `change` methods
-- basic contract storage
+# ✎ Prerequisitos 
+  1. Node.js _(Versión en la que se realizó: 16.11.1)_
+  2. Yarn instalado <code>npm install --global yarn</code>  
+  3. instalar dependencias <code>yarn install</code>
+  4. Si es el caso, crear una cuenta de NEAR en [testnet](https://docs.near.org/docs/develop/basics/create-account#creating-a-testnet-account)
+  5. Instalar NEAR CLI <code>yarn install --global near-cli</code>
+  6. autorizar app para dar acceso a la cuenta de NEAR <code>near login</code>
 
-There are 2 AssemblyScript contracts in this project, each in their own folder:
+## 🐑 Clonar el Repositorio
+<code>git clone https://github.com/MiguelIslasH/nearbrary</code>
 
-- **simple** in the `src/simple` folder
-- **singleton** in the `src/singleton` folder
+## 🥶 instalar y compilar el contrato
+  - <code>yarn install</code>
+  - <code>yarn build</code>
 
-### Simple
+## 🚀 Deployar el contrato
+  - <code>yarn dev:deploy:contract</code>
 
-We say that an AssemblyScript contract is written in the "simple style" when the `index.ts` file (the contract entry point) includes a series of exported functions.
+## ☃ Correr comandos
+Una vez en deploy el contrato, a partir de ahora [será utilizado como CONTRACT_ID en los ejemplos de comandos]
+Utilizaremos [ACCOUNT_ID para identificar el account Id] que utilizamos para autorizar la app.
 
-In this case, all exported functions become public contract methods.
+### Registrar usuario
+near call _CONTRACT_ID_ registerUser '{"email": "este-email-mola@eldominio.com","name": "Carlitos"}' --accountId _ACCOUNT_ID_
 
-```ts
-// return the string 'hello world'
-export function helloWorld(): string {}
+### Publicar una obra: ejemplo que se usa en comprar libro
+near call  _CONTRACT_ID_ postBook '{"title": "La hacedora de viudas", "price": "20.20", "synopsis": "La noche es mi velo", "content": "Una vez un hombre me dijo que me pusiera ropa, así que me vestí con..."}' --accountId _ACCOUNT_ID_
 
-// read the given key from account (contract) storage
-export function read(key: string): string {}
+### Consultar una obra
+near view  _CONTRACT_ID_ getBook '{"title": "La noche"}'
 
-// write the given value at the given key to account (contract) storage
-export function write(key: string, value: string): string {}
+### Consultar todas las obras: regresa la instacia, pues se planea usar así para futuros avances
+near view  _CONTRACT_ID_ getBooks
 
-// private helper method used by read() and write() above
-private storageReport(): string {}
-```
+### Comprar libro: ejemplo válido e inválido por la cantidad
+near call  _CONTRACT_ID_ buyBook '{"title": "La hacedora de viudas"}' --amount 20.20 --accountId _ACCOUNT_ID_
+near call  _CONTRACT_ID_ buyBook '{"title": "La hacedora de viudas"}' --amount 0 --accountId _ACCOUNT_ID_
 
-### Singleton
+### Consultar datos del usuario
+near view _CONTRACT_ID_ getUserData '{"accountId": "_ACCOUNT_ID_"}'
 
-We say that an AssemblyScript contract is written in the "singleton style" when the `index.ts` file (the contract entry point) has a single exported class (the name of the class doesn't matter) that is decorated with `@nearBindgen`.
+# Caso de uso: Publicación y compra de obras.
+Pensamos en un diseño que tuviera colores oscuros de forma predominante, la gente se desgasta menos su vista si la página cuenta con fondos oscuros, lo que el usuario haría sería:
+   * Consultar las obras publicadas y próximas a publicar
+   * Consultar las obras adquiridas
+   * Crear una cuenta usando tu cuenta de mainet.
+   * Iniciar sesión usando tu cuenta de mainet y tu contraseña.
+   * Ver el el detalle de alguna obra y:
+       * Comprarla completamente
+       * Comprarla parcialmente: por capítulos
+       * Los comentarios y reseñas sobre la obra
+       * Poder comentar y hacer una reseña
+   * Buscar obras por título, extensión, año y autor.
+   * Subir obras de su autoría
+<br />
 
-In this case, all methods on the class become public contract methods unless marked `private`.  Also, all instance variables are stored as a serialized instance of the class under a special storage key named `STATE`.  AssemblyScript uses JSON for storage serialization (as opposed to Rust contracts which use a custom binary serialization format called borsh).
+Estos diseños se pueden encontrar y navegar por ellos aquí: https://www.canva.com/design/DAEuDoppBm4/Ds8X480YRXE-LiZmxx1VOg/view?utm_content=DAEuDoppBm4&utm_campaign=designshare&utm_medium=link&utm_source=sharebutton
 
-```ts
-@nearBindgen
-export class Contract {
-
-  // return the string 'hello world'
-  helloWorld(): string {}
-
-  // read the given key from account (contract) storage
-  read(key: string): string {}
-
-  // write the given value at the given key to account (contract) storage
-  @mutateState()
-  write(key: string, value: string): string {}
-
-  // private helper method used by read() and write() above
-  private storageReport(): string {}
-}
-```
-
-
-## Usage
-
-### Getting started
-
-(see below for video recordings of each of the following steps)
-
-1. clone this repo to a local folder
-2. run `yarn`
-3. run `./scripts/1.dev-deploy.sh`
-3. run `./scripts/2.use-contract.sh`
-4. run `./scripts/2.use-contract.sh` (yes, run it to see changes)
-5. run `./scripts/3.cleanup.sh`
-
-### Videos
-
-**`1.dev-deploy.sh`**
-
-This video shows the build and deployment of the contract.
-
-[![asciicast](https://asciinema.org/a/409575.svg)](https://asciinema.org/a/409575)
-
-**`2.use-contract.sh`**
-
-This video shows contract methods being called.  You should run the script twice to see the effect it has on contract state.
-
-[![asciicast](https://asciinema.org/a/409577.svg)](https://asciinema.org/a/409577)
-
-**`3.cleanup.sh`**
-
-This video shows the cleanup script running.  Make sure you add the `BENEFICIARY` environment variable. The script will remind you if you forget.
-
-```sh
-export BENEFICIARY=<your-account-here>   # this account receives contract account balance
-```
-
-[![asciicast](https://asciinema.org/a/409580.svg)](https://asciinema.org/a/409580)
-
-### Other documentation
-
-- See `./scripts/README.md` for documentation about the scripts
-- Watch this video where Willem Wyndham walks us through refactoring a simple example of a NEAR smart contract written in AssemblyScript
-
-  https://youtu.be/QP7aveSqRPo
-
-  ```
-  There are 2 "styles" of implementing AssemblyScript NEAR contracts:
-  - the contract interface can either be a collection of exported functions
-  - or the contract interface can be the methods of a an exported class
-
-  We call the second style "Singleton" because there is only one instance of the class which is serialized to the blockchain storage.  Rust contracts written for NEAR do this by default with the contract struct.
-
-   0:00 noise (to cut)
-   0:10 Welcome
-   0:59 Create project starting with "npm init"
-   2:20 Customize the project for AssemblyScript development
-   9:25 Import the Counter example and get unit tests passing
-  18:30 Adapt the Counter example to a Singleton style contract
-  21:49 Refactoring unit tests to access the new methods
-  24:45 Review and summary
-  ```
-
-## The file system
-
-```sh
-├── README.md                          # this file
-├── as-pect.config.js                  # configuration for as-pect (AssemblyScript unit testing)
-├── asconfig.json                      # configuration for AssemblyScript compiler (supports multiple contracts)
-├── package.json                       # NodeJS project manifest
-├── scripts
-│   ├── 1.dev-deploy.sh                # helper: build and deploy contracts
-│   ├── 2.use-contract.sh              # helper: call methods on ContractPromise
-│   ├── 3.cleanup.sh                   # helper: delete build and deploy artifacts
-│   └── README.md                      # documentation for helper scripts
-├── src
-│   ├── as_types.d.ts                  # AssemblyScript headers for type hints
-│   ├── simple                         # Contract 1: "Simple example"
-│   │   ├── __tests__
-│   │   │   ├── as-pect.d.ts           # as-pect unit testing headers for type hints
-│   │   │   └── index.unit.spec.ts     # unit tests for contract 1
-│   │   ├── asconfig.json              # configuration for AssemblyScript compiler (one per contract)
-│   │   └── assembly
-│   │       └── index.ts               # contract code for contract 1
-│   ├── singleton                      # Contract 2: "Singleton-style example"
-│   │   ├── __tests__
-│   │   │   ├── as-pect.d.ts           # as-pect unit testing headers for type hints
-│   │   │   └── index.unit.spec.ts     # unit tests for contract 2
-│   │   ├── asconfig.json              # configuration for AssemblyScript compiler (one per contract)
-│   │   └── assembly
-│   │       └── index.ts               # contract code for contract 2
-│   ├── tsconfig.json                  # Typescript configuration
-│   └── utils.ts                       # common contract utility functions
-└── yarn.lock                          # project manifest version lock
-```
-
-You may clone this repo to get started OR create everything from scratch.
-
-Please note that, in order to create the AssemblyScript and tests folder structure, you may use the command `asp --init` which will create the following folders and files:
-
-```
-./assembly/
-./assembly/tests/
-./assembly/tests/example.spec.ts
-./assembly/tests/as-pect.d.ts
-```
+![image](https://user-images.githubusercontent.com/29590213/139554969-a6eadbb2-27b8-437c-b7bd-24c27305b292.png)
